@@ -94,7 +94,7 @@ public class ArrayList<T> implements List<T> {
         oldVar = (T) data[index];
         data[index] = null;
         size--;
-        if (index < data.length) {
+        if (index < size) {
             System.arraycopy(data, index + 1, data, index, size - index);
         }
         return oldVar;
