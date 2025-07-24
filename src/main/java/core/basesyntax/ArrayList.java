@@ -1,44 +1,16 @@
 package core.basesyntax;
 
-import java.util.Arrays;
 import java.util.NoSuchElementException;
 
 public class ArrayList<T> implements List<T> {
     private static final int DEFAULT_SIZE = 10;
+    private static final float CAPACITY_INDEX = 1.5f;
 
     private Object[] data;
     private int size;
 
     public ArrayList() {
         this.data = new Object[DEFAULT_SIZE];
-    }
-
-    private void grow() {
-        int newSize = data.length + (data.length >> 1);
-        this.data = Arrays.copyOf(data, newSize);
-    }
-
-    @Override
-    public String toString() {
-        return "ArrayList{"
-                + "data=" + Arrays.toString(data)
-                + '}';
-    }
-
-    private void innerAdd(T value, int s) {
-        if (size == data.length) {
-            grow();
-        }
-        if (s < size) {
-            System.arraycopy(data, s, data, s + 1, size - s);
-        }
-        try {
-            data[s] = value;
-            size++;
-        } catch (IndexOutOfBoundsException e) {
-            throw new ArrayListIndexOutOfBoundsException(
-                    "Adding new element at index is failed: index out of bounds", e);
-        }
     }
 
     @Override
@@ -48,37 +20,26 @@ public class ArrayList<T> implements List<T> {
 
     @Override
     public void add(T value, int index) {
-        if (index == size) {
-            add(value);
-            return;
-        }
         checkIndex(index);
-        innerAdd(value, index);
+        resize();
+        System.arraycopy(data, index, data, index + 1, size - index);
+        data[index] = value;
+        size++;
     }
 
     @Override
     public void addAll(List<T> list) {
-        if (list == null) {
-            throw new IllegalArgumentException("list can't be null");
-        }
-
-        while (data.length < size + list.size()) {
-            grow();
-        }
-
-        Object[] inputArray = new Object[list.size()];
         for (int i = 0; i < list.size(); i++) {
-            inputArray[i] = list.get(i);
+            resize();
+            data[size] = list.get(i);
+            size++;
         }
-
-        System.arraycopy(inputArray, 0, data, size, list.size());
-        size += list.size();
     }
 
     @Override
     public T get(int index) {
         checkIndex(index);
-        return data[index] != null ? (T) data[index] : null;
+        return (T) data[index];
     }
 
     @Override
@@ -120,12 +81,37 @@ public class ArrayList<T> implements List<T> {
         return size == 0;
     }
 
+    private void resize() {
+        if (data.length == size) {
+            int newCapacity = (int) (data.length * CAPACITY_INDEX);
+            Object[] newArray = new Object[newCapacity];
+            System.arraycopy(data, 0, newArray, 0, size);
+            data = newArray;
+        }
+    }
+
     private boolean checkIndex(int index) {
         if (index < 0 || index >= size) {
             throw new ArrayListIndexOutOfBoundsException(
                     "Index is out of bounds");
         }
         return true;
+    }
+
+    private void innerAdd(T value, int idx) {
+        if (size == data.length) {
+            resize();
+        }
+        if (idx < size) {
+            System.arraycopy(data, idx, data, idx + 1, size - idx);
+        }
+        try {
+            data[idx] = value;
+            size++;
+        } catch (IndexOutOfBoundsException e) {
+            throw new ArrayListIndexOutOfBoundsException(
+                    "Adding new element at index is failed: index out of bounds", e);
+        }
     }
 
 }
