@@ -20,7 +20,7 @@ public class ArrayList<T> implements List<T> {
 
     @Override
     public void add(T value, int index) {
-        checkIndex(index);
+        checkIndexAdd(index);
         resize();
         System.arraycopy(data, index, data, index + 1, size - index);
         data[index] = value;
@@ -88,6 +88,14 @@ public class ArrayList<T> implements List<T> {
             System.arraycopy(data, 0, newArray, 0, size);
             data = newArray;
         }
+    }
+
+    private boolean checkIndexAdd(int index) {
+        if (index < 0 || index > size) {
+            throw new ArrayListIndexOutOfBoundsException(
+                    "Index is out of bounds");
+        }
+        return true;
     }
 
     private boolean checkIndex(int index) {
